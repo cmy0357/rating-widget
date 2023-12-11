@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HW5 Rating Widget</title>
+</head>
+
+<body>
+
+<h1>Rating Widget</h1>
+<rating-widget max="5">
+    <form action="https://httpbin.org/post" method="post">
+        <label for="rating">How satisfied are you?</label>
+        <input type="hidden" name="question" value="How satisfied are you?">
+        <input type="hidden" name="sentBy" value="HTML">
+        <input type="number" id="rating" name="rating" min="1" max="5" value="0" required>
+        <button type="submit">Submit</button>
+    </form>
+</rating-widget>
+
+<script>
+    class RatingWidget extends HTMLElement {
+        constructor() {
+            super();
+            this.attachShadow({ mode: 'open' });
+            this.shadowRoot.innerHTML = `
+            <style>
+                #widget {
+                    display: flex;
+                }
+                .star {
+                    font-size: 24pt;
+                    color: grey;
+                }
+                .star.active {
+                    color: red;
+                }
+            </style>
+            <div id="widget"></div>
+            <p id="message"></p>
+            `;
+            this.startWidget();
+        }
+
+        startWidget() {
+            const widgetElement = this.shadowRoot.getElementById("widget");
+            const messageElement = this.shadowRoot.getElementById("message");
+            const starSymbol = String.fromCodePoint(0x2605);
+            let stars = [];
+            for(var i = 0; i < this.getAttribute('max'); i++) {
+                let starElement = document.createElement('div');
+                starElement.className = 'star';
+                starElement.textContent = starSymbol;
+                starElement.addEventListener('mouseover', function(event) {
+                    const index = stars.indexOf(this);
+                    for(var j = 0; j <= index; j++) {
+                        stars[j].classList.add('active');
+                    }
+                });
+                starElement.addEventListener('mouseleave', function(event) {
+                    const index = stars.indexOf(this);
+                    for(var j = 0; j <= index; j++) {
+                        stars[j].classList.remove('active');
+                    }
+                });
+
+                const t = this;
+                if(i <= 2) {
+                    starElement.addEventListener('click', function(event) {
+                        const index = stars.indexOf(this);
+                        messageElement.textContent = "Thanks for your feedback of " + (index+1) + " stars. We'll try to do better!";
+                        t.submitRating();
+                    });
+                }
+                else {
+                    starElement.addEventListener('click', function(event) {
+                        const index = stars.indexOf(this);
+                        messageElement.textContent = "Thanks for " + (index+1) + " star rating!";
+                        t.submitRating();
+                    });
+                }
+
+                widgetElement.appendChild(starElement);
+                stars.push(starElement);
+            }
+        }
+
+        submitRating() {
+            const formData = new FormData();
+            formData.append('sentBy', 'JS');
+            setTimeout(() => {
+                fetch("https://httpbin.org/post", {
+                    method: "POST", 
+                    body: formData,
+                    headers: {
+                        'X-Sent-By': 'JS'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                    })
+                    .catch(error => {
+                        console.error("Network connection failed!!");
+                    })
+            }, 1000);
+        }
+    }
+    window.customElements.define('rating-widget', RatingWidget);
+</script>
+
+</body>
+</html>

@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HW5 Rating Widget</title>
+    <title>Rating Widget</title>
 </head>
 
 <body>
 
-<h1>Rating Widget</h1>
+
 <rating-widget max="5">
     <form action="https://httpbin.org/post" method="post">
         <label for="rating">How satisfied are you?</label>
@@ -18,6 +18,11 @@
         <button type="submit">Submit</button>
     </form>
 </rating-widget>
+<style>
+    p {
+        color: violet;
+    }
+</style>
 
 <script>
     class RatingWidget extends HTMLElement {
@@ -34,9 +39,22 @@
                     color: grey;
                 }
                 .star.active {
-                    color: red;
+                    color: violet;
+                }
+                @keyframes flash {
+                    0%, 49.9%, 100% {
+                        color: red;
+                    }
+                    50%, 99.9% {
+                        color: blue;
+                    }
+                }
+                #message {
+                    font-size: 30pt;
+                    animation: flash 1s infinite;
                 }
             </style>
+            <img src="/images/pick.jpg" id="image" width="160px" height="160px">
             <div id="widget"></div>
             <p id="message"></p>
             `;
@@ -45,6 +63,7 @@
 
         startWidget() {
             const widgetElement = this.shadowRoot.getElementById("widget");
+            const imgElement = this.shadowRoot.getElementById("image");
             const messageElement = this.shadowRoot.getElementById("message");
             const starSymbol = String.fromCodePoint(0x2605);
             let stars = [];
@@ -66,11 +85,12 @@
                 });
 
                 const t = this;
-                if(i <= 2) {
+                if(i <= 3) {
                     starElement.addEventListener('click', function(event) {
                         widgetElement.remove();
                         const index = stars.indexOf(this);
-                        messageElement.textContent = "Thanks for your feedback of " + (index+1) + " stars. We'll try to do better!";
+                        imgElement.setAttribute("src", "/images/bigdan.jpg");
+                        messageElement.textContent = "Big 胆！竟然敢给"+ (index+1) + "星？";
                         t.submitRating();
                     });
                 }
@@ -78,7 +98,8 @@
                     starElement.addEventListener('click', function(event) {
                         widgetElement.remove();
                         const index = stars.indexOf(this);
-                        messageElement.textContent = "Thanks for " + (index+1) + " star rating!";
+                        imgElement.setAttribute("src", "/images/wenhao.jpg");
+                        messageElement.textContent = "？没见过帅哥？";
                         t.submitRating();
                     });
                 }
